@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Add Faculty - Student Attendance Management System{% endblock %}
+{% block page_title %}Add New Faculty Member{% endblock %}
+
+{% block content %}
+<div class="card-box" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h2>👨‍🏫 Add Faculty Member</h2>
+        <a href="{{ url_for('list_faculty') }}" class="btn btn-secondary btn-sm">Back to Directory</a>
+    </div>
+
+    <form id="facultyForm" method="POST" action="{{ url_for('add_faculty') }}">
+        <div class="form-group">
+            <label for="name">Faculty Full Name *</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Dr. Sunita Rao" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="e.g. sunita@attendance.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Account Password *</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <div class="form-group">
+            <label for="role">User Role *</label>
+            <select id="role" name="role" class="form-control" required>
+                <option value="faculty" selected>Faculty</option>
+                <option value="admin">Administrator</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary">Save Faculty</button>
+            <a href="{{ url_for('list_faculty') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

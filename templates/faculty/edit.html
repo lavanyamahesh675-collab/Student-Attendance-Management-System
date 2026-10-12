@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Faculty - Student Attendance Management System{% endblock %}
+{% block page_title %}Edit Faculty Member{% endblock %}
+
+{% block content %}
+<div class="card-box" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h2>✏️ Edit Faculty Member</h2>
+        <a href="{{ url_for('list_faculty') }}" class="btn btn-secondary btn-sm">Back to Directory</a>
+    </div>
+
+    <form id="facultyForm" method="POST" action="{{ url_for('edit_faculty', user_id=faculty.user_id) }}">
+        <div class="form-group">
+            <label for="name">Faculty Full Name *</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ faculty.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" class="form-control" value="{{ faculty.email }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">New Password (leave blank to keep current password)</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
+        </div>
+
+        <div class="form-group">
+            <label for="role">User Role *</label>
+            <select id="role" name="role" class="form-control" required>
+                <option value="faculty" {% if faculty.role == 'faculty' %}selected{% endif %}>Faculty</option>
+                <option value="admin" {% if faculty.role == 'admin' %}selected{% endif %}>Administrator</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary">Update Faculty</button>
+            <a href="{{ url_for('list_faculty') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Subject Management - Student Attendance Management System{% endblock %}
+{% block page_title %}Subject Management{% endblock %}
+
+{% block content %}
+<div class="card-box">
+    <div class="card-header">
+        <h2>📚 Curriculum Subjects</h2>
+        {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('add_subject') }}" class="btn btn-primary">➕ Add New Subject</a>
+        {% endif %}
+    </div>
+
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Semester</th>
+                    <th>Assigned Faculty</th>
+                    {% if session.get('role') == 'admin' %}
+                    <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if subjects %}
+                    {% for subject in subjects %}
+                    <tr>
+                        <td><strong>{{ subject.subject_code }}</strong></td>
+                        <td>{{ subject.subject_name }}</td>
+                        <td>Semester {{ subject.semester }}</td>
+                        <td>
+                            {% if subject.faculty_name %}
+                                <span style="font-weight: 600; color: #1e293b;">{{ subject.faculty_name }}</span>
+                            {% else %}
+                                <span style="color: #94a3b8; font-style: italic;">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        {% if session.get('role') == 'admin' %}
+                        <td>
+                            <div style="display: flex; gap: 0.4rem;">
+                                <a href="{{ url_for('edit_subject', subject_id=subject.subject_id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{{ url_for('delete_subject', subject_id=subject.subject_id) }}" class="btn btn-sm btn-danger" onclick="return confirmDelete('Delete subject {{ subject.subject_code }}?')">Delete</a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #64748b;">No subjects available.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

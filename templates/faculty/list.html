@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Directory - Student Attendance Management System{% endblock %}
+{% block page_title %}Faculty Management{% endblock %}
+
+{% block content %}
+<div class="card-box">
+    <div class="card-header">
+        <h2>👨‍🏫 Faculty & Staff Members</h2>
+        {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('add_faculty') }}" class="btn btn-primary">➕ Add New Faculty</a>
+        {% endif %}
+    </div>
+
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email Address</th>
+                    <th>Role</th>
+                    <th>Assigned Subjects</th>
+                    {% if session.get('role') == 'admin' %}
+                    <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if faculty_list %}
+                    {% for faculty in faculty_list %}
+                    <tr>
+                        <td>#{{ faculty.user_id }}</td>
+                        <td><strong>{{ faculty.name }}</strong></td>
+                        <td>{{ faculty.email }}</td>
+                        <td>
+                            <span class="user-role-badge badge-{{ faculty.role }}">{{ faculty.role }}</span>
+                        </td>
+                        <td>{{ faculty.assigned_subjects or 'None' }}</td>
+                        {% if session.get('role') == 'admin' %}
+                        <td>
+                            <div style="display: flex; gap: 0.4rem;">
+                                <a href="{{ url_for('edit_faculty', user_id=faculty.user_id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                {% if faculty.user_id != session.get('user_id') %}
+                                <a href="{{ url_for('delete_faculty', user_id=faculty.user_id) }}" class="btn btn-sm btn-danger" onclick="return confirmDelete('Delete faculty user {{ faculty.name }}?')">Delete</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #64748b;">No faculty members registered.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

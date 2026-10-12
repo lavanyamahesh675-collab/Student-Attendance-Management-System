@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Student Attendance Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+
+    <div class="login-card">
+        <div class="login-header">
+            <span class="login-badge">DBMS Lab Project</span>
+            <h1>Student Attendance System</h1>
+            <p>Enter your credentials to access the portal</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="admin@attendance.com" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem;">
+                Sign In
+            </button>
+        </form>
+
+        <div style="margin-top: 2rem; padding: 1rem; background: rgba(241, 245, 249, 0.9); border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem;">
+            <p style="font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">🔑 Demo Login Accounts:</p>
+            <div style="margin-bottom: 0.4rem;">
+                <strong>Admin:</strong> <code>admin@attendance.com</code> | <code>admin123</code>
+            </div>
+            <div>
+                <strong>Faculty:</strong> <code>faculty@attendance.com</code> | <code>faculty123</code>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+</body>
+</html>

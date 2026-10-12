@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Attendance - Student Attendance Management System{% endblock %}
+{% block page_title %}Edit Attendance Records{% endblock %}
+
+{% block content %}
+<div class="card-box">
+    <div class="card-header">
+        <h2>✏️ Edit Attendance Records</h2>
+    </div>
+
+    <!-- Selection Filter Form -->
+    <form method="GET" action="{{ url_for('edit_attendance') }}" class="filter-bar">
+        <div class="form-grid">
+            <div class="form-group" style="margin: 0;">
+                <label for="date">Select Date *</label>
+                <input type="date" id="date" name="date" class="form-control" value="{{ selected_date }}" required>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+                <label for="subject_id">Select Subject *</label>
+                <select id="subject_id" name="subject_id" class="form-control" required>
+                    <option value="">-- Select Subject --</option>
+                    {% for subj in subjects %}
+                    <option value="{{ subj.subject_id }}" {% if selected_subject_id == subj.subject_id %}selected{% endif %}>
+                        {{ subj.subject_name }} ({{ subj.subject_code }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.25rem;">
+            <button type="submit" class="btn btn-primary">Retrieve Attendance Records</button>
+        </div>
+    </form>
+
+    {% if attendance_records %}
+        <form method="POST" action="{{ url_for('update_attendance') }}">
+            <input type="hidden" name="attendance_date" value="{{ selected_date }}">
+            <input type="hidden" name="subject_id" value="{{ selected_subject_id }}">
+
+            <div style="margin-bottom: 1rem; color: #475569; font-weight: 600;">
+                Editing {{ attendance_records|length }} record(s) for Date: <strong>{{ selected_date }}</strong>
+            </div>
+
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Department</th>
+                            <th>Current Status</th>
+                            <th style="text-align: center;">Modify Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in attendance_records %}
+                        <tr>
+                            <td><strong>{{ record.roll_number }}</strong></td>
+                            <td>{{ record.student_name }}</td>
+                            <td>{{ record.department }} (Yr {{ record.year }}, Sec {{ record.section }})</td>
+                            <td>
+                                {% if record.status == 'Present' %}
+                                    <span class="badge-present">Present</span>
+                                {% else %}
+                                    <span class="badge-absent">Absent</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <div class="attendance-toggle-group" style="justify-content: center;">
+                                    <label class="radio-label" style="color: #16a34a;">
+                                        <input type="radio" name="status_{{ record.student_id }}" value="Present" {% if record.status == 'Present' %}checked{% endif %}>
+                                        Present
+                                    </label>
+                                    <label class="radio-label" style="color: #dc2626;">
+                                        <input type="radio" name="status_{{ record.student_id }}" value="Absent" {% if record.status == 'Absent' %}checked{% endif %}>
+                                        Absent
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem;">
+                    💾 Save Updated Attendance
+                </button>
+            </div>
+        </form>
+    {% elif selected_subject_id and selected_date %}
+        <div style="text-align: center; padding: 3rem; background: #f8fafc; border-radius: 8px; color: #64748b;">
+            ⚠️ No attendance records found for the selected subject and date.
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem; background: #f8fafc; border-radius: 8px; color: #64748b;">
+            💡 Select Date and Subject above to view and modify existing attendance records.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

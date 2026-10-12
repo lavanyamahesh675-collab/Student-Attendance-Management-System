@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Student Attendance Management System{% endblock %}
+{% block page_title %}System Dashboard{% endblock %}
+
+{% block content %}
+<!-- Key Metrics Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </div>
+        <div class="stat-details">
+            <h3>Total Students</h3>
+            <div class="stat-number">{{ stats.total_students }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-purple">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        </div>
+        <div class="stat-details">
+            <h3>Total Faculty</h3>
+            <div class="stat-number">{{ stats.total_faculty }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-orange">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </div>
+        <div class="stat-details">
+            <h3>Total Subjects</h3>
+            <div class="stat-number">{{ stats.total_subjects }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-green">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        </div>
+        <div class="stat-details">
+            <h3>Today's Attendance</h3>
+            <div class="stat-number">{{ stats.today_attendance_count }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Action Buttons -->
+<div class="card-box">
+    <div class="card-header">
+        <h2>⚡ Quick Actions</h2>
+    </div>
+    <div class="quick-actions">
+        {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('add_student') }}" class="action-btn-card">
+            <span style="font-size: 1.2rem; color: #2563eb;">➕</span>
+            Add Student
+        </a>
+        <a href="{{ url_for('add_subject') }}" class="action-btn-card">
+            <span style="font-size: 1.2rem; color: #8b5cf6;">📚</span>
+            Add Subject
+        </a>
+        {% endif %}
+        <a href="{{ url_for('mark_attendance') }}" class="action-btn-card">
+            <span style="font-size: 1.2rem; color: #10b981;">📝</span>
+            Mark Attendance
+        </a>
+        <a href="{{ url_for('attendance_report') }}" class="action-btn-card">
+            <span style="font-size: 1.2rem; color: #f59e0b;">📊</span>
+            View Reports
+        </a>
+    </div>
+</div>
+
+<!-- Recent Attendance Records & Summary Table -->
+<div class="card-box">
+    <div class="card-header">
+        <h2>📋 Recent Attendance Activity</h2>
+        <a href="{{ url_for('attendance_report') }}" class="btn btn-sm btn-primary">View Full Report</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_attendance %}
+                    {% for record in recent_attendance %}
+                    <tr>
+                        <td>{{ record.attendance_date }}</td>
+                        <td><strong>{{ record.roll_number }}</strong></td>
+                        <td>{{ record.student_name }}</td>
+                        <td>{{ record.department }} ({{ record.year }} Yr, Sec {{ record.section }})</td>
+                        <td>{{ record.subject_name }} ({{ record.subject_code }})</td>
+                        <td>
+                            {% if record.status == 'Present' %}
+                                <span class="badge-present">Present</span>
+                            {% else %}
+                                <span class="badge-absent">Absent</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #64748b; padding: 2rem;">No recent attendance records found. Use "Mark Attendance" to log student presence.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

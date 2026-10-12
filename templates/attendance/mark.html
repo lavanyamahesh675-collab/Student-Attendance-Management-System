@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance - Student Attendance Management System{% endblock %}
+{% block page_title %}Mark Daily Attendance{% endblock %}
+
+{% block content %}
+<div class="card-box">
+    <div class="card-header">
+        <h2>📝 Mark Attendance</h2>
+    </div>
+
+    <!-- Selection Filter Form -->
+    <form method="GET" action="{{ url_for('mark_attendance') }}" class="filter-bar">
+        <div class="form-grid">
+            <div class="form-group" style="margin: 0;">
+                <label for="attendance_date">Date *</label>
+                <input type="date" id="attendance_date" name="date" class="form-control" value="{{ selected_date }}" required>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+                <label for="subject_id">Subject *</label>
+                <select id="subject_id" name="subject_id" class="form-control" required>
+                    <option value="">-- Select Subject --</option>
+                    {% for subj in subjects %}
+                    <option value="{{ subj.subject_id }}" {% if selected_subject_id == subj.subject_id %}selected{% endif %}>
+                        {{ subj.subject_name }} ({{ subj.subject_code }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+                <label for="department">Department *</label>
+                <select id="department" name="department" class="form-control" required>
+                    <option value="CSM" {% if selected_dept == 'CSM' %}selected{% endif %}>CSM</option>
+                    <option value="CSE" {% if selected_dept == 'CSE' %}selected{% endif %}>CSE</option>
+                    <option value="ECE" {% if selected_dept == 'ECE' %}selected{% endif %}>ECE</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+                <label for="year">Year *</label>
+                <select id="year" name="year" class="form-control" required>
+                    <option value="1" {% if selected_year == 1 %}selected{% endif %}>Year 1</option>
+                    <option value="2" {% if selected_year == 2 %}selected{% endif %}>Year 2</option>
+                    <option value="3" {% if selected_year == 3 %}selected{% endif %}>Year 3</option>
+                    <option value="4" {% if selected_year == 4 %}selected{% endif %}>Year 4</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+                <label for="section">Section *</label>
+                <select id="section" name="section" class="form-control" required>
+                    <option value="A" {% if selected_section == 'A' %}selected{% endif %}>Section A</option>
+                    <option value="B" {% if selected_section == 'B' %}selected{% endif %}>Section B</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
+            <button type="submit" class="btn btn-primary">Fetch Students List</button>
+        </div>
+    </form>
+
+    <!-- Students Attendance Table -->
+    {% if students %}
+        <form id="attendanceMarkForm" method="POST" action="{{ url_for('save_attendance') }}">
+            <input type="hidden" name="attendance_date" value="{{ selected_date }}">
+            <input type="hidden" name="subject_id" value="{{ selected_subject_id }}">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="font-weight: 600; color: #475569;">
+                    Found {{ students|length }} Student(s) for Dept: <strong>{{ selected_dept }}</strong>, Year: <strong>{{ selected_year }}</strong>, Sec: <strong>{{ selected_section }}</strong>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="button" id="markAllPresentBtn" class="btn btn-sm btn-success">✅ Mark All Present</button>
+                    <button type="button" id="markAllAbsentBtn" class="btn btn-sm btn-danger">❌ Mark All Absent</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Email</th>
+                            <th style="text-align: center;">Attendance Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr class="student-attendance-row">
+                            <td><strong>{{ student.roll_number }}</strong></td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td style="text-align: center;">
+                                <div class="attendance-toggle-group" style="justify-content: center;">
+                                    <label class="radio-label" style="color: #16a34a;">
+                                        <input type="radio" name="status_{{ student.student_id }}" value="Present" 
+                                        {% if existing_attendance.get(student.student_id) == 'Present' %}checked{% elif not existing_attendance.get(student.student_id) %}checked{% endif %}>
+                                        Present
+                                    </label>
+                                    <label class="radio-label" style="color: #dc2626;">
+                                        <input type="radio" name="status_{{ student.student_id }}" value="Absent"
+                                        {% if existing_attendance.get(student.student_id) == 'Absent' %}checked{% endif %}>
+                                        Absent
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem; font-size: 1rem;">
+                    💾 Save Attendance
+                </button>
+            </div>
+        </form>
+    {% elif selected_subject_id %}
+        <div style="text-align: center; padding: 3rem; background: #f8fafc; border-radius: 8px; color: #64748b;">
+            ⚠️ No students found for Department: <strong>{{ selected_dept }}</strong>, Year: <strong>{{ selected_year }}</strong>, Section: <strong>{{ selected_section }}</strong>.
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem; background: #f8fafc; border-radius: 8px; color: #64748b;">
+            💡 Select Date, Subject, Department, Year and Section above, then click "Fetch Students List" to mark attendance.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
