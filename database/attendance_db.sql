@@ -81,9 +81,9 @@ CREATE TABLE attendance (
 -- 1. Insert Users (Admin & Faculty)
 -- Note: Werkzeug pbkdf2:sha256 hash for 'admin123' and 'faculty123'
 INSERT INTO users (user_id, name, email, password, role) VALUES
-(1, 'System Administrator', 'admin@attendance.com', 'pbkdf2:sha256:1000000$FGZyL3oaDnU6sQso$21999b6e47d9833e11f0b74d047ad8c43a597783a28724c4c148d41669fd001c', 'admin'),
-(2, 'Dr. Ramesh Verma', 'faculty@attendance.com', 'pbkdf2:sha256:1000000$0b9e9UcZvaVqAelD$6bf373df097ba82be016ab33a1b47ed718df084398a3290e1ee7b6e7054f1702', 'faculty'),
-(3, 'Prof. Sunita Sharma', 'prof.sharma@attendance.com', 'pbkdf2:sha256:1000000$0b9e9UcZvaVqAelD$6bf373df097ba82be016ab33a1b47ed718df084398a3290e1ee7b6e7054f1702', 'faculty');
+(1, 'System Administrator', 'admin@attendance.com', 'pbkdf2:sha256:1000000$QF1DwkXjiHWkgPca$fabf72e5e60398401a24c6722fa9e36e311b77ff1098f6ef392f445d53cbd834', 'admin'),
+(2, 'Dr. Ramesh Verma', 'faculty@attendance.com', 'pbkdf2:sha256:1000000$9udbeR1Pr1VHgwZb$033c464ecd2e4cd9021291d76bb3f2eb689519d72ddff075cdec89f15935c075', 'faculty'),
+(3, 'Prof. Sunita Sharma', 'prof.sharma@attendance.com', 'pbkdf2:sha256:1000000$9udbeR1Pr1VHgwZb$033c464ecd2e4cd9021291d76bb3f2eb689519d72ddff075cdec89f15935c075', 'faculty');
 
 -- 2. Insert Students (At least 10 sample students)
 INSERT INTO students (student_id, roll_number, name, email, phone, department, year, section, batch) VALUES

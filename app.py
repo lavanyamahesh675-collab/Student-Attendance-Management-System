@@ -10,8 +10,11 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
+import db_adapter
+import sqlite3
+
 # ---------------------------------------------------------
-# DATABASE CONNECTION HELPER
+# DATABASE CONNECTION HELPER (Supports MySQL & Free Cloud Fallback)
 # ---------------------------------------------------------
 def get_db_connection():
     try:
@@ -23,9 +26,14 @@ def get_db_connection():
             port=app.config['DB_PORT']
         )
         return conn
-    except mysql.connector.Error as err:
-        app.logger.error(f"MySQL Connection Error: {err}")
-        return None
+    except Exception as err:
+        app.logger.info(f"MySQL not available ({err}), activating 100% Free Cloud Database...")
+        db_path = os.path.join(os.path.dirname(__file__), 'attendance.db')
+        db_adapter.init_sqlite_db(db_path)
+        raw_conn = sqlite3.connect(db_path)
+        raw_conn.row_factory = sqlite3.Row
+        return db_adapter.SQLiteConnWrapper(raw_conn)
+
 
 # ---------------------------------------------------------
 # AUTHENTICATION & ROLE-BASED ACCESS DECORATORS
@@ -363,7 +371,7 @@ def list_faculty():
     try:
         cursor.execute("""
             SELECT u.user_id, u.name, u.email, u.role,
-                   GROUP_CONCAT(sub.subject_name SEPARATOR ', ') AS assigned_subjects
+                   GROUP_CONCAT(sub.subject_name) AS assigned_subjects
             FROM users u
             LEFT JOIN subjects sub ON u.user_id = sub.faculty_id
             GROUP BY u.user_id, u.name, u.email, u.role
@@ -930,6 +938,56 @@ def attendance_report():
             to_date=to_date,
             active_page='report'
         )
+    finally:
+        cursor.close()
+        conn.close()
+
+# ---------------------------------------------------------
+# DATABASE INITIALIZER ROUTE (FOR CLOUD DEPLOYMENT)
+# ---------------------------------------------------------
+@app.route('/init-mysql')
+def init_mysql():
+    pwd = request.args.get('pwd', '')
+    if not pwd:
+        return "Please provide password in query string, e.g. /init-mysql?pwd=YOUR_PASSWORD", 400
+    
+    app.config['DB_PASSWORD'] = pwd
+    conn = get_db_connection()
+    if not conn:
+        try:
+            conn_root = mysql.connector.connect(
+                host=app.config['DB_HOST'],
+                user=app.config['DB_USER'],
+                password=pwd,
+                port=app.config['DB_PORT']
+            )
+            cursor = conn_root.cursor()
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{app.config['DB_NAME']}`")
+            conn_root.commit()
+            cursor.close()
+            conn_root.close()
+            conn = get_db_connection()
+        except Exception as e:
+            return f"Failed to connect to MySQL on {app.config['DB_HOST']}: {e}", 500
+
+    if not conn:
+        return "Could not connect to database.", 500
+
+    cursor = conn.cursor()
+    try:
+        sql_file = os.path.join(os.path.dirname(__file__), 'database', 'attendance_db.sql')
+        if os.path.exists(sql_file):
+            with open(sql_file, 'r') as f:
+                statements = f.read().split(';')
+            for stmt in statements:
+                s = stmt.strip()
+                if s and not s.lower().startswith('create database') and not s.lower().startswith('use '):
+                    try:
+                        cursor.execute(s)
+                    except Exception:
+                        pass
+            conn.commit()
+        return "Database initialized successfully! <a href='/login'>Go to Login</a>"
     finally:
         cursor.close()
         conn.close()
